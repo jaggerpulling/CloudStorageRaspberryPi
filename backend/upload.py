@@ -1,3 +1,5 @@
+import fastapi
+
 #check for file upload
 #currently doing so by monitoring file directory
 
