@@ -18,4 +18,4 @@ cloud storage server running on my raspberry pi 24/7, future plans: adding conte
 # Frontend (UI)
 
 - Using Svelte for polished dashboard
-
+- Imported design from figma
