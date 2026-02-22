@@ -27,6 +27,17 @@ def download():
     with open(save_path, "wb") as f:
         f.write(file_data.content)
 
+def delete():
+    filename = input("file to delete: ")
+    response = requests.delete(f"{BACKEND_URL}/file/delete/{filename}")
+    
+    if response.status_code == 200:
+        print("Deleted:", response.json()["message"])
+    elif response.status_code == 404:
+        print("Error: file not found")
+    else:
+        print("Error:", response.status_code, response.text)
+
 
 
 def header():
@@ -52,6 +63,7 @@ def startMenu():
 
     commands = {
         "2": download,
+        "3": delete
     }
 
     if option in commands:

@@ -8,14 +8,6 @@ STORAGE_PATH = "D:\cloud"
 
 app = FastAPI()
 
-
-item_list = ["car","bike","motor","guitar"]
-
- 
-@app.get("/items") #whenever someone makes a get request run the function
-async def items(): #called whenever it receives request to url "/" using a GET operation
-    return {"items": item_list}
-
 @app.post("/file/upload")
 async def upload_file(file: UploadFile):
     path = f"{STORAGE_PATH}/{file.filename}"
@@ -29,7 +21,16 @@ async def download_file(filename: str):
     path = os.path.join(STORAGE_PATH, filename)
     return FileResponse(path)
 
+@app.delete("/file/delete/{filename}")
+async def delete_item(filename: str):
+    path = os.path.join(STORAGE_PATH, filename)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="File not found")
+    os.remove(path)
+    return {"message": f"{filename} deleted successfully"}
+
     
+
 
 
 #common operations
