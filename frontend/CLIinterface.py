@@ -1,4 +1,13 @@
 #temporary command line interface to test API requests without needing
+
+#tkinter library for file dialog and expanding frontend
+import tkinter as tk
+from tkinter import filedialog
+
+root = tk.Tk()
+root.withdraw()
+
+
 #full frontend
 import requests
 
@@ -6,16 +15,17 @@ BACKEND_URL = "http://127.0.0.1:8000"
 
 
 
-
 def download():
-    #send get request over https of files
-    response = requests.get(f'{BACKEND_URL}/items')
+    # ask for save location
+    save_path = filedialog.asksaveasfilename(
+        title="Save file as",
+        initialfile="downloaded_file.txt"
+    )
+    filename = input("file name: ") 
+    file_data = requests.get(f"{BACKEND_URL}/file/download/{filename}")
 
-    items = response.json()
-
-    print(items)
-    #{'items': ['car', 'bike', 'motor', 'guitar']}
-
+    with open(save_path, "wb") as f:
+        f.write(file_data.content)
 
 
 
