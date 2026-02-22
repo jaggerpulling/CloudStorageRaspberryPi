@@ -2,13 +2,14 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
- 
-@app.get("/") #whenever someone makes a get request run the function
-async def root(): #called whenever it receives request to url "/" using a GET operation
-    return {"message": "Hello World"}
 
-@app.post("/upload file")
-async def file_upload() 
+item_list = ["car","bike","motor","guitar"]
+
+ 
+@app.get("/items") #whenever someone makes a get request run the function
+async def items(): #called whenever it receives request to url "/" using a GET operation
+    return {"items": item_list}
+
 
 #common operations
 """
