@@ -29,9 +29,6 @@ async def delete_item(filename: str):
     os.remove(path)
     return {"message": f"{filename} deleted successfully"}
 
-    
-
-
 
 #common operations
 """
