@@ -1,10 +1,10 @@
 <script lang="ts">
-  import Dashboard from '../lib/Dashboard.svelte';
+  import Dashboard from "../lib/Dashboard.svelte";
 </script>
 
 <main>
   <h1>Cloud Storage Dashboard Demo</h1>
-  <Dashboard />
+  <Dashboard apiEndpoint="http://localhost:8000/storage/data" theme="auto" />
 </main>
 
 <style>

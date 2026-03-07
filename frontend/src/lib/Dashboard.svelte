@@ -1,30 +1,57 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import type { DashboardProps } from './types';
-  import { storageStore } from './stores/storageStore';
-  import { uiStore } from './stores/uiStore';
-  import { tabRegistry } from './stores/tabRegistry';
-  import { generateMockData } from './utils/mockData';
-  import StorageStats from './components/StorageStats.svelte';
-  import FileList from './components/FileList.svelte';
+  import { onMount } from "svelte";
+  import type { DashboardProps } from "./types";
+  import { storageStore } from "./stores/storageStore";
+  import { uiStore } from "./stores/uiStore";
+  import { tabRegistry } from "./stores/tabRegistry";
+  import { generateMockData } from "./utils/mockData";
+  import StorageStats from "./components/StorageStats.svelte";
+  import FileList from "./components/FileList.svelte";
+  import type { FileItem } from "./types";
+  import { fetchStorageData } from "./utils/fetchStorageData";
 
-  export let apiEndpoint: DashboardProps['apiEndpoint'] = undefined;
-  export let theme: DashboardProps['theme'] = 'auto';
-  export let initialTab: DashboardProps['initialTab'] = 'storage-overview';
-  export let customTabs: DashboardProps['customTabs'] = [];
+  export let apiEndpoint: DashboardProps["apiEndpoint"] = undefined;
+  export let theme: DashboardProps["theme"] = "auto";
+  export let initialTab: DashboardProps["initialTab"] = "storage-overview";
+  export let customTabs: DashboardProps["customTabs"] = [];
 
   async function initializeDashboard() {
     try {
-      uiStore.setTheme(theme);
-      uiStore.setActiveTab(initialTab);
+      uiStore.setTheme(theme ?? "auto");
+      uiStore.setActiveTab(initialTab ?? "files");
       uiStore.setLoading(true);
-      
-      const mockData = generateMockData();
-      storageStore.set(mockData);
+
+      if (apiEndpoint) {
+        // Fetch real data from backend
+        await fetchStorageData(apiEndpoint);
+      } else {
+        // Fallback to mock data
+        const mockData = generateMockData();
+        storageStore.set(mockData);
+      }
 
       uiStore.setLoading(false);
     } catch (error) {
       uiStore.setLoading(false);
+    }
+  }
+
+  function downloadFile(file: any) {
+    const link = document.createElement("a");
+    link.href = file.url;
+    link.download = file.name;
+    link.click();
+  }
+
+  async function deleteFile(file: FileItem) {
+    const res = await fetch(`http://localhost:8000/file/delete/${file.id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      storageStore.update((store) => ({
+        ...store,
+        files: store.files.filter((f) => f.id !== file.id),
+      }));
     }
   }
 
@@ -35,7 +62,7 @@
   $: isLoading = $uiStore.isLoading;
   $: error = $uiStore.error;
   $: currentTheme = $uiStore.theme;
-  $: themeClass = currentTheme === 'auto' ? '' : `theme-${currentTheme}`;
+  $: themeClass = currentTheme === "auto" ? "" : `theme-${currentTheme}`;
 </script>
 
 <div class="dashboard-wrapper {themeClass}" data-theme={currentTheme}>
@@ -60,7 +87,15 @@
         <div class="section-header">
           <h2>Files</h2>
         </div>
-        <FileList files={$storageStore.files} />
+        <FileList
+          files={$storageStore.files}
+          on:fileAction={(e) => {
+            /* File button Functionality*/
+            const { action, file } = e.detail;
+            if (action === "download") downloadFile(file);
+            if (action === "delete") deleteFile(file);
+          }}
+        />
       </section>
     </main>
   {/if}
@@ -115,7 +150,7 @@
   }
 
   /* This is where the magic happens for the big monitor */
-  .stats-section, 
+  .stats-section,
   .files-section {
     max-width: 1200px; /* Limits the table width so it's readable */
     margin: 0 auto 2rem auto; /* Centers the card, not the whole page */
@@ -143,9 +178,10 @@
     --text-primary: #111827;
   }
 
-  .theme-dark, :global(.dashboard-wrapper) {
+  .theme-dark,
+  :global(.dashboard-wrapper) {
     --dashboard-bg: #111827; /* Dark background */
-    --header-bg: #1f2937;    /* Lighter grey-blue for the cards */
+    --header-bg: #1f2937; /* Lighter grey-blue for the cards */
     --border-color: #374151;
     --text-primary: #f9fafb;
   }

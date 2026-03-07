@@ -1,7 +1,7 @@
 <script lang="ts">
   /**
    * FileList Component
-   * 
+   *
    * Displays a sortable, filterable table of files with selection support.
    * Features:
    * - Table with columns: name, size, type, date
@@ -9,19 +9,19 @@
    * - Filter input with debouncing
    * - File selection (single and multiple)
    * - File action events
-   * 
+   *
    * Requirements: 2.4.1, 2.4.2, 2.4.3, 2.4.4, 2.4.5, 2.4.6
    */
-  
-  import { createEventDispatcher } from 'svelte';
-  import type { FileItem, SortField, SortOrder } from '../types';
-  import { sortFiles } from '../utils/sortFiles';
-  import { filterFiles } from '../utils/filterFiles';
-  import { formatBytes } from '../utils/formatBytes';
+
+  import { createEventDispatcher } from "svelte";
+  import type { FileItem, SortField, SortOrder } from "../types";
+  import { sortFiles } from "../utils/sortFiles";
+  import { filterFiles } from "../utils/filterFiles";
+  import { formatBytes } from "../utils/formatBytes";
 
   // Props
   export let files: FileItem[] = [];
-  
+
   // Event dispatcher for file actions
   const dispatch = createEventDispatcher<{
     fileSelect: FileItem;
@@ -29,12 +29,12 @@
   }>();
 
   // Component state
-  let sortBy: SortField = 'name';
-  let sortOrder: SortOrder = 'asc';
-  let filterText: string = '';
+  let sortBy: SortField = "name";
+  let sortOrder: SortOrder = "asc";
+  let filterText: string = "";
   let selectedFiles: Set<string> = new Set();
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-  let debouncedFilterText: string = '';
+  let debouncedFilterText: string = "";
   let initialRender = true;
 
   // Debounce filter input (300ms delay)
@@ -55,11 +55,11 @@
   function handleSort(field: SortField) {
     if (sortBy === field) {
       // Toggle order if same field
-      sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+      sortOrder = sortOrder === "asc" ? "desc" : "asc";
     } else {
       // New field, default to ascending
       sortBy = field;
-      sortOrder = 'asc';
+      sortOrder = "asc";
     }
   }
 
@@ -77,30 +77,30 @@
       // Single select
       selectedFiles = new Set([file.id]);
     }
-    
-    dispatch('fileSelect', file);
+
+    dispatch("fileSelect", file);
   }
 
   // Handle file action
   function handleFileAction(action: string, file: FileItem) {
-    dispatch('fileAction', { action, file });
+    dispatch("fileAction", { action, file });
   }
 
   // Format date for display
   function formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   }
 
   // Get sort indicator
   function getSortIndicator(field: SortField): string {
-    if (sortBy !== field) return '';
-    return sortOrder === 'asc' ? '↑' : '↓';
+    if (sortBy !== field) return "";
+    return sortOrder === "asc" ? "↑" : "↓";
   }
 </script>
 
@@ -127,11 +127,13 @@
           <th>
             <input
               type="checkbox"
-              checked={selectedFiles.size === displayFiles.length && displayFiles.length > 0}
-              indeterminate={selectedFiles.size > 0 && selectedFiles.size < displayFiles.length}
+              checked={selectedFiles.size === displayFiles.length &&
+                displayFiles.length > 0}
+              indeterminate={selectedFiles.size > 0 &&
+                selectedFiles.size < displayFiles.length}
               on:change={(e) => {
                 if (e.currentTarget.checked) {
-                  selectedFiles = new Set(displayFiles.map(f => f.id));
+                  selectedFiles = new Set(displayFiles.map((f) => f.id));
                 } else {
                   selectedFiles = new Set();
                 }
@@ -139,17 +141,17 @@
               aria-label="Select all files"
             />
           </th>
-          <th class="sortable" on:click={() => handleSort('name')}>
-            Name {getSortIndicator('name')}
+          <th class="sortable" on:click={() => handleSort("name")}>
+            Name {getSortIndicator("name")}
           </th>
-          <th class="sortable" on:click={() => handleSort('size')}>
-            Size {getSortIndicator('size')}
+          <th class="sortable" on:click={() => handleSort("size")}>
+            Size {getSortIndicator("size")}
           </th>
-          <th class="sortable" on:click={() => handleSort('type')}>
-            Type {getSortIndicator('type')}
+          <th class="sortable" on:click={() => handleSort("type")}>
+            Type {getSortIndicator("type")}
           </th>
-          <th class="sortable" on:click={() => handleSort('date')}>
-            Last Modified {getSortIndicator('date')}
+          <th class="sortable" on:click={() => handleSort("date")}>
+            Last Modified {getSortIndicator("date")}
           </th>
           <th>Actions</th>
         </tr>
@@ -185,14 +187,16 @@
             <td class="actions">
               <button
                 class="action-btn"
-                on:click|stopPropagation={() => handleFileAction('download', file)}
+                on:click|stopPropagation={() =>
+                  handleFileAction("download", file)}
                 aria-label={`Download ${file.name}`}
               >
                 Download
               </button>
               <button
                 class="action-btn danger"
-                on:click|stopPropagation={() => handleFileAction('delete', file)}
+                on:click|stopPropagation={() =>
+                  handleFileAction("delete", file)}
                 aria-label={`Delete ${file.name}`}
               >
                 Delete
@@ -202,7 +206,9 @@
         {:else}
           <tr>
             <td colspan="6" class="empty-state">
-              {filterText ? 'No files match your filter' : 'No files to display'}
+              {filterText
+                ? "No files match your filter"
+                : "No files to display"}
             </td>
           </tr>
         {/each}
