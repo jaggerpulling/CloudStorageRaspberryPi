@@ -14,7 +14,7 @@ import { validateStorageData } from '../utils/validation';
  * Initial storage data state
  */
 const initialStorageData: StorageData = {
-  totalStorage: 15 * 1024 ** 3, // 15 GB
+  totalStorage: 13 * 1024 ** 3, // 13 GB
   usedStorage: 1024 ** 3,       // 1 GB used
   files: [],
   storageByType: {

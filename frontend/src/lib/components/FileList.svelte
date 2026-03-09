@@ -94,7 +94,7 @@
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }).format(date);
+    }).format(new Date(date));
   }
 
   // Get sort indicator
@@ -239,13 +239,13 @@
     border: 1px solid var(--input-border, #d1d5db);
     border-radius: 0.375rem;
     font-size: 0.875rem;
-    background: var(--input-bg, #ffffff);
+    background: var(--card-bg);
     color: var(--text-primary, #111827);
   }
 
   .filter-input:focus {
     outline: none;
-    border-color: var(--input-focus, #3b82f6);
+    border-color: var(--button-bg);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
@@ -257,9 +257,9 @@
 
   .table-container {
     overflow-x: auto;
-    border: 1px solid var(--table-border, #e5e7eb);
+    border: 1px solid var(--table-border);
     border-radius: 0.5rem;
-    background: var(--table-bg, #ffffff);
+    background: var(--table-bg);
   }
 
   .file-table {

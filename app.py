@@ -28,11 +28,21 @@ app.add_middleware(
 
 @app.post("/file/upload")
 async def upload_file(file: UploadFile):
-    path = f"{STORAGE_PATH}/{file.filename}"
+    path = Path(STORAGE_PATH) / file.filename
     contents = await file.read() #get bytes of file
     with open(path, "wb") as f:
         f.write(contents) # write file 
-    return {"message": f"Upload successful, {file.filename} uploaded to {path}"} 
+    stat = path.stat()
+    mime_type, _ = mimetypes.guess_type(str(path))
+    
+    return {
+        "id": file.filename,
+        "name": file.filename,
+        "size": stat.st_size,
+        "type": mime_type or "application/octet-stream",
+        "lastModified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+        "path": file.filename
+    }
 
 @app.get("/file/download/{filename}")
 async def download_file(filename: str):
