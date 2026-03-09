@@ -5,7 +5,7 @@
  * file items, and tab definitions according to the requirements.
  */
 
-import type { StorageData, FileItem, TabDefinition } from '../types';
+import type { StorageData, FileItem, FolderItem, TabDefinition } from '../types';
 
 /**
  * Validates a FileItem object
@@ -151,13 +151,13 @@ export function validateStorageData(data: unknown): {
 
   // Return validated data with filtered files
   const validatedData: StorageData = {
-    totalStorage: storage.totalStorage!,
-    usedStorage: storage.usedStorage!,
-    files: validFiles,
-    storageByType: storage.storageByType!,
-    lastUpdated: storage.lastUpdated!,
-  };
-
+  totalStorage: storage.totalStorage!,
+  usedStorage: storage.usedStorage!,
+  files: validFiles,
+  folders: Array.isArray(storage.folders) ? storage.folders : [],  
+  storageByType: storage.storageByType!,
+  lastUpdated: storage.lastUpdated!,
+};
   return {
     isValid: true,
     data: validatedData,

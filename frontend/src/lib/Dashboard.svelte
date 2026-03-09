@@ -55,6 +55,18 @@
     link.click();
   }
 
+  /* Folder functionality */
+  let currentPath = "";
+
+  $: currentFolders =
+    $storageStore.folders?.filter(
+      (f) => f.path.split("/").slice(0, -1).join("/") === currentPath,
+    ) ?? [];
+
+  $: currentFiles = $storageStore.files.filter(
+    (f) => f.path.split("/").slice(0, -1).join("/") === currentPath,
+  );
+
   async function deleteFile(file: FileItem) {
     const res = await fetch(`http://localhost:8000/file/delete/${file.id}`, {
       method: "DELETE",
@@ -148,7 +160,8 @@
           >
         </div>
         <FileList
-          files={$storageStore.files}
+          files={currentFiles}
+          folders={currentFolders}
           on:fileAction={(e) => {
             /* File button Functionality*/
             const { action, file } = e.detail;

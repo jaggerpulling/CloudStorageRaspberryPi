@@ -14,13 +14,14 @@ import { validateStorageData } from '../utils/validation';
  * Initial storage data state
  */
 const initialStorageData: StorageData = {
-  totalStorage: 13 * 1024 ** 3, // 13 GB
-  usedStorage: 1024 ** 3,       // 1 GB used
+  totalStorage: 13 * 1024 ** 3,
+  usedStorage: 1024 ** 3,
   files: [],
+  folders: [],  
   storageByType: {
-    documents: 512 * 1024 ** 2, // 0.5 GB
-    images: 256 * 1024 ** 2,    // 0.25 GB
-    videos: 256 * 1024 ** 2,    // 0.25 GB
+    documents: 512 * 1024 ** 2,
+    images: 256 * 1024 ** 2,
+    videos: 256 * 1024 ** 2,
   },
   lastUpdated: new Date(),
 };

@@ -57,6 +57,20 @@ async def delete_item(filename: str):
     os.remove(path)
     return {"message": f"{filename} deleted successfully"}
 
+@app.post("/folder/create")
+async def create_folder(path: str):
+    folder_path = Path(STORAGE_PATH) / path
+    folder_path.mkdir(parents=True, exist_ok=True)
+    return {"message": f"Folder {path} created"}
+
+@app.delete("/folder/delete/{path:path}")
+async def delete_folder(path: str):
+    folder_path = Path(STORAGE_PATH) / path
+    if not folder_path.exists():
+        raise HTTPException(status_code=404, detail="Folder not found")
+    shutil.rmtree(folder_path)
+    return {"message": f"Folder {path} deleted"}
+
 @app.get("/storage/data")
 async def get_storage_data():
     try:
@@ -107,6 +121,9 @@ async def get_storage_data():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 #common operations
 """

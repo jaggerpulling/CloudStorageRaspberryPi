@@ -54,15 +54,18 @@ export async function fetchStorageData(apiEndpoint: string): Promise<StorageData
 
     // Convert date strings to Date objects if needed
     const dataWithDates = {
-      ...rawData,
-      lastUpdated: rawData.lastUpdated ? new Date(rawData.lastUpdated) : new Date(),
-      files: Array.isArray(rawData.files)
-        ? rawData.files.map((file: any) => ({
-            ...file,
-            lastModified: file.lastModified ? new Date(file.lastModified) : new Date(),
-          }))
-        : [],
-    };
+  ...rawData,
+  lastUpdated: rawData.lastUpdated ? new Date(rawData.lastUpdated) : new Date(),
+  files: Array.isArray(rawData.files)
+    ? rawData.files.map((file: any) => ({
+        ...file,
+        lastModified: file.lastModified ? new Date(file.lastModified) : new Date(),
+      }))
+    : [],
+  folders: Array.isArray(rawData.folders)  // 👈 add this
+    ? rawData.folders
+    : [],
+};
 
     // Validate response data structure
     const validation = validateStorageData(dataWithDates);
