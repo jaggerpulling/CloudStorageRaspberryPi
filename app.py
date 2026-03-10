@@ -28,11 +28,21 @@ app.add_middleware(
 
 @app.post("/file/upload")
 async def upload_file(file: UploadFile):
-    path = f"{STORAGE_PATH}/{file.filename}"
+    path = Path(STORAGE_PATH) / file.filename
     contents = await file.read() #get bytes of file
     with open(path, "wb") as f:
         f.write(contents) # write file 
-    return {"message": f"Upload successful, {file.filename} uploaded to {path}"} 
+    stat = path.stat()
+    mime_type, _ = mimetypes.guess_type(str(path))
+    
+    return {
+        "id": file.filename,
+        "name": file.filename,
+        "size": stat.st_size,
+        "type": mime_type or "application/octet-stream",
+        "lastModified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+        "path": file.filename
+    }
 
 @app.get("/file/download/{filename}")
 async def download_file(filename: str):
@@ -46,6 +56,20 @@ async def delete_item(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
     os.remove(path)
     return {"message": f"{filename} deleted successfully"}
+
+@app.post("/folder/create")
+async def create_folder(path: str):
+    folder_path = Path(STORAGE_PATH) / path
+    folder_path.mkdir(parents=True, exist_ok=True)
+    return {"message": f"Folder {path} created"}
+
+@app.delete("/folder/delete/{path:path}")
+async def delete_folder(path: str):
+    folder_path = Path(STORAGE_PATH) / path
+    if not folder_path.exists():
+        raise HTTPException(status_code=404, detail="Folder not found")
+    shutil.rmtree(folder_path)
+    return {"message": f"Folder {path} deleted"}
 
 @app.get("/storage/data")
 async def get_storage_data():
@@ -97,6 +121,9 @@ async def get_storage_data():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 #common operations
 """

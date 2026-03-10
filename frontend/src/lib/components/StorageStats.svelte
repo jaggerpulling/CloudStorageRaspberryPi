@@ -1,17 +1,21 @@
 <script lang="ts">
   /**
    * StorageStats Component
-   * 
+   *
    * Displays key storage metrics in card format:
    * - Total, used, and available storage with human-readable formatting
    * - Storage usage percentage
    * - Total file count
-   * 
+   *
    * Requirements: 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5, 2.3.6
    */
-  
-  import { storageStore, storagePercentage, availableStorage } from '../stores/storageStore';
-  import { formatBytes } from '../utils/formatBytes';
+
+  import {
+    storageStore,
+    storagePercentage,
+    availableStorage,
+  } from "../stores/storageStore";
+  import { formatBytes } from "../utils/formatBytes";
 
   // Subscribe to storage store for reactive updates
   $: totalStorage = $storageStore.totalStorage;
@@ -97,7 +101,7 @@
   /* Dark theme support */
   @media (prefers-color-scheme: dark) {
     .stat-card {
-      --card-bg: #1f2937;
+      background-color: var(--card-bg);
       --card-border: #374151;
     }
 

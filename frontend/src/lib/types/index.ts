@@ -32,6 +32,8 @@ export interface StorageData {
   usedStorage: number;
   /** Array of file items */
   files: FileItem[];
+  /**Folders */
+  folders: FolderItem[]; 
   /** Storage used per file type (in bytes) */
   storageByType: Record<string, number>;
   /** Timestamp of last data fetch */
@@ -83,6 +85,18 @@ export interface DashboardProps {
 }
 
 /**
+ * Represents a folder item in the storage system
+ */
+export interface FolderItem {
+  /** Unique folder identifier */
+  id: string;
+  /** Folder name */
+  name: string;
+  /** Full folder path */
+  path: string;
+}
+
+/**
  * Sort field options for file list
  */
 export type SortField = 'name' | 'size' | 'date' | 'type';
@@ -111,6 +125,7 @@ export interface StorageStatsProps {
  */
 export interface FileListProps {
   files: FileItem[];
+  folders?: FolderItem[];
   onFileSelect?: (file: FileItem) => void;
   onFileAction?: (action: string, file: FileItem) => void;
 }

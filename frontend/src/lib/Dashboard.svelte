@@ -15,17 +15,29 @@
   export let initialTab: DashboardProps["initialTab"] = "storage-overview";
   export let customTabs: DashboardProps["customTabs"] = [];
 
+  function getSystemTheme(): "dark" | "light" {
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      return "dark";
+    }
+    return "light";
+  }
+
   async function initializeDashboard() {
     try {
-      uiStore.setTheme(theme ?? "auto");
+      // If theme is auto, read system preference
+      const finalTheme =
+        theme === "auto" ? getSystemTheme() : (theme ?? "dark");
+      uiStore.setTheme(finalTheme);
+
       uiStore.setActiveTab(initialTab ?? "files");
       uiStore.setLoading(true);
 
       if (apiEndpoint) {
-        // Fetch real data from backend
         await fetchStorageData(apiEndpoint);
       } else {
-        // Fallback to mock data
         const mockData = generateMockData();
         storageStore.set(mockData);
       }
@@ -43,6 +55,18 @@
     link.click();
   }
 
+  /* Folder functionality */
+  let currentPath = "";
+
+  $: currentFolders =
+    $storageStore.folders?.filter(
+      (f) => f.path.split("/").slice(0, -1).join("/") === currentPath,
+    ) ?? [];
+
+  $: currentFiles = $storageStore.files.filter(
+    (f) => f.path.split("/").slice(0, -1).join("/") === currentPath,
+  );
+
   async function deleteFile(file: FileItem) {
     const res = await fetch(`http://localhost:8000/file/delete/${file.id}`, {
       method: "DELETE",
@@ -53,6 +77,51 @@
         files: store.files.filter((f) => f.id !== file.id),
       }));
     }
+  }
+
+  let isUploading = false;
+  async function uploadFile() {
+    isUploading = true;
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+
+    fileInput.onchange = async () => {
+      const file = fileInput.files?.[0];
+      if (!file) {
+        isUploading = false;
+        return;
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("http://localhost:8000/file/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+
+        const raw = await res.json();
+        const newFile: FileItem = {
+          ...raw,
+          lastModified: new Date(raw.lastModified),
+        };
+
+        storageStore.update((store) => ({
+          ...store,
+          files: [newFile, ...store.files],
+        }));
+      } catch (err) {
+        console.error("Upload error:", err);
+      } finally {
+        isUploading = false;
+      }
+    };
+
+    fileInput.click();
   }
 
   onMount(() => {
@@ -86,9 +155,13 @@
       <section class="files-section">
         <div class="section-header">
           <h2>Files</h2>
+          <button class="upload-btn" on:click={uploadFile}
+            >{isUploading ? "Uploading..." : "Upload"}</button
+          >
         </div>
         <FileList
-          files={$storageStore.files}
+          files={currentFiles}
+          folders={currentFolders}
           on:fileAction={(e) => {
             /* File button Functionality*/
             const { action, file } = e.detail;
@@ -102,17 +175,19 @@
 </div>
 
 <style>
-  /* 1. THE FOUNDATION: FORCE THE ENTIRE BROWSER TO DARK MODE */
+  /* 1. FORCE THE ENTIRE BROWSER TO DARK MODE DEFAULT */
   :global(html, body, #app) {
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    background-color: #111827 !important; /* Forces the white sides to stay dark */
+    background-color: var(--dashboard-bg);
+    color: var(--text-primary);
     overflow-x: hidden;
+    font-family: -apple-system, system-ui, sans-serif;
   }
 
-  /* 2. THE PARENT KILLER: Forces the Svelte-generated parent to vanish */
+  /* 2. PARENT & TITLE FIXES (Svelte-generated) */
   :global(main.s-_lt6Cdtrjdys) {
     margin: 0 !important;
     padding: 0 !important;
@@ -120,19 +195,19 @@
     display: block !important;
   }
 
-  /* 3. THE TITLE KILLER: Keeps that duplicate header gone */
   :global(h1.s-_lt6Cdtrjdys) {
     display: none !important;
   }
 
+  /* DASHBOARD WRAPPER */
   .dashboard-wrapper {
     min-height: 100vh;
     width: 100%;
     background-color: var(--dashboard-bg);
     color: var(--text-primary);
-    font-family: -apple-system, system-ui, sans-serif;
   }
 
+  /* DASHBOARD HEADER */
   .dashboard-header {
     background-color: var(--header-bg);
     border-bottom: 1px solid var(--border-color);
@@ -141,48 +216,78 @@
     box-sizing: border-box;
   }
 
-  /* 4. CONTAINERIZING THE CONTENT: 
-     We keep the background full width, but cap the text inside */
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* MAIN CONTENT */
   .dashboard-content {
     width: 100%;
     padding: 2rem;
     box-sizing: border-box;
   }
 
-  /* This is where the magic happens for the big monitor */
-  .stats-section,
-  .files-section {
-    max-width: 1200px; /* Limits the table width so it's readable */
-    margin: 0 auto 2rem auto; /* Centers the card, not the whole page */
+  /* SECTION HEADER WITH BUTTONS */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
   }
 
-  /* This makes the file area look like a professional "App" container */
+  /* UPLOAD BUTTON */
+  .upload-btn {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .upload-btn:hover {
+    background-color: var(--button-hover-bg);
+  }
+
+  /* STATS AND FILES SECTION */
+  .stats-section,
   .files-section {
-    background-color: var(--header-bg);
+    max-width: 1200px;
+    margin: 0 auto 2rem auto;
+  }
+
+  /* FILES SECTION CARD */
+  .files-section {
+    background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
   }
 
-  .header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
   /* THEMES */
   .theme-light {
     --dashboard-bg: #f3f4f6;
     --header-bg: #ffffff;
+    --card-bg: #f9fafb;
     --border-color: #e5e7eb;
     --text-primary: #111827;
+    --button-bg: #b46a02;
+    --button-hover-bg: #995900;
+    --button-text: #ffffff;
   }
 
-  .theme-dark,
-  :global(.dashboard-wrapper) {
-    --dashboard-bg: #111827; /* Dark background */
-    --header-bg: #1f2937; /* Lighter grey-blue for the cards */
-    --border-color: #374151;
+  .theme-dark {
+    --dashboard-bg: #16181b;
+    --header-bg: #141618;
+    --card-bg: #1f2126;
+    --border-color: #1f252e;
     --text-primary: #f9fafb;
+    --button-bg: #c17f2a;
+    --button-hover-bg: #b06d1f;
+    --button-text: #ffffff;
   }
 </style>
