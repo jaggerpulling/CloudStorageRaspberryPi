@@ -8,14 +8,14 @@ import mimetypes
 from fastapi.middleware.cors import CORSMiddleware
 
 #TEMP PATH FOR TESTING// CHANGE TO RPI STORAGE
-STORAGE_PATH = "D:\cloud"
+STORAGE_PATH = "/home/jagger/cloudMock"
 
 app = FastAPI()
 
 # Allow requests from your frontend origin
 origins = [
-    "http://localhost:5173",  # your Svelte dev server
-    # "http://127.0.0.1:5173"  # sometimes needed
+    "http://localhost:5173",  # Svelte dev server
+    
 ]
 
 app.add_middleware(

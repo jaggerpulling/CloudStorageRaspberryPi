@@ -3,7 +3,15 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { resolve } from 'path';
 
 export default defineConfig(({ command }) => ({
-  plugins: [svelte()],
+  plugins: [
+    svelte({
+      compilerOptions: {
+        compatibility: {
+          componentApi: 4
+        }
+      }
+    })
+  ],
   build: command === 'build' ? {
     lib: {
       entry: resolve(__dirname, 'src/lib/index.ts'),

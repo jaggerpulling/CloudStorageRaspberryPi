@@ -24,12 +24,13 @@
     }
     return "light";
   }
+  console.log(getSystemTheme())
 
   async function initializeDashboard() {
     try {
       // If theme is auto, read system preference
       const finalTheme =
-        theme === "auto" ? getSystemTheme() : (theme ?? "dark");
+        theme = "dark";
       uiStore.setTheme(finalTheme);
 
       uiStore.setActiveTab(initialTab ?? "files");
